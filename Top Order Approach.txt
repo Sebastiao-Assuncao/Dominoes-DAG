@@ -1,0 +1,46 @@
+#Para cada vértice guardar o seu maior caminho, caminho de uma source = 1
+
+Let G = (V,E) be the graph. Each v in V has v.pi (list of its parents), v.d and v.c(discover and close time in DFS)
+
+struct node{
+    int d, c, dist;
+    vector<int> children;
+    vector<int>parents;
+    string color;
+}
+
+Main():
+
+    sources = 0;
+    biggest = 1;
+    topOrder = topologicalOrder(G);
+
+    for each v in topOrder
+
+        if v.pi = nil:
+            dist[v] = 1
+            sources++;
+        
+        else:
+            value = max{dist[v.pi]}, v.pi are v's parents
+            dist[v] = value + 1;
+            if value > biggest:
+                biggest = value
+
+    
+    return biggest value in dist
+
+
+topologicalOrder(G): //Returns a vector with the vertices in topologicalOrder
+
+    DFS(G)  // When a vertice is closed, add to topOrder
+
+
+
+O(V) + O(V+E) = O(V+E)
+
+Problemas:
+
+Variáveis Globais
+Node deve ser ponteiro para node e nao um node em si
+ParseInput está na merda
