@@ -6,144 +6,142 @@
 
 using namespace std;
 
-typedef struct Node
+typedef struct node
 {
-    vector<int> parents;
-    vector<int> children;
-    int d = 0, f = 0, dist = -1, dfs_parent;
+    vector<node *> parents, children;
+    int dist = -1;
+    node *dfs_parent;
     string color;
-} Node;
+} * Node;
 
-typedef struct Graph
+struct Graph
 {
-    int N, E;
+    int N;
     vector<Node> nodes;
-} Graph;
+};
 
 Graph G;
-vector<int> topOrder;
+vector<Node> topOrder;
 
-void parseInput(string filename)
+void parseInput()
 {
-    ifstream file(filename);
     string line;
     vector<string> result;
 
-    //Get the number of vertices and edges. N is the number of nodes, E is the number of edges
-    getline(file, line);
+    // Get the number of vertices (G.N)
+    getline(cin, line);
     istringstream iss(line);
 
     for (string line; iss >> line;)
         result.push_back(line);
 
+    // We dont need to store the number of edges
     stringstream temp1(result[0]);
-    stringstream temp2(result[1]);
     temp1 >> G.N;
-    temp2 >> G.E;
 
     // Make the nodes vector the size needed
     G.nodes.resize(G.N);
 
     result.clear();
 
-    //Get the edges
-    while (getline(file, line))
+    // Get the edges
+    while (getline(cin, line))
     {
         istringstream iss(line);
         int parent, child;
 
+        // Parse the line
         for (string line; iss >> line;)
             result.push_back(line);
 
         istringstream aux0(result[0]);
         istringstream aux1(result[1]);
 
+        // Assign the indexes to the nodes (scale with -1, because indexing in C++ starts at 0)
         aux0 >> parent;
         aux1 >> child;
         parent -= 1;
         child -= 1;
 
-        if (G.nodes[child].dist == 0) // Se ainda nao tiver sido criado
-        {
-            Node new_child;
-            G.nodes[child] = new_child;
-        }
+        // If either the parent node or the child node dont existe, create them
+        if (!G.nodes[child])
+            G.nodes[child] = (Node)malloc(sizeof(struct node));
 
-        if (G.nodes[parent].dist == 0)
-        {
-            Node new_parent;
-            G.nodes[parent] = new_parent;
-        }
+        if (!G.nodes[parent])
+            G.nodes[parent] = (Node)malloc(sizeof(struct node));
 
-        G.nodes[child].parents.push_back(parent);
-        G.nodes[parent].children.push_back(child);
+        // Add the parent to the childs 'parents' list and the child to the parents 'children' list
+        G.nodes[child]->parents.push_back(G.nodes[parent]);
+        G.nodes[parent]->children.push_back(G.nodes[child]);
 
         result.clear();
     }
 }
 
-int DFS_visit(int v_index, int time)
+int DFS_visit(Node v, int time)
 {
 
-    G.nodes[v_index].color = "gray";
+    v->color = "gray"; // Its currently being visited
     time++;
-    G.nodes[v_index].d = time;
 
-    for (int i = 0; i < G.nodes[v_index].children.size(); i++)
+    // Preform DFS on each of v's children
+    for (int i = 0; i < int(v->children.size()); i++)
     {
+        Node u = v->children[i];
 
-        int u_index = G.nodes[v_index].children[i];
-        if (G.nodes[u_index].color == "white")
+        // Visit child if its 'white'
+        if (u->color == "white")
         {
-            time = DFS_visit(u_index, time);
-            G.nodes[u_index].dfs_parent = v_index;
+            time = DFS_visit(u, time);
+            u->dfs_parent = v;
         }
     }
 
-    G.nodes[v_index].color = "black";
+    // Close the node and assign the close time
+    v->color = "black";
     time++;
-    G.nodes[v_index].f = time;
 
-    topOrder.insert(topOrder.begin(), v_index);
+    // Insert the closed node at the beggining of the topological order vector
+    topOrder.insert(topOrder.begin(), v);
 
     return time;
 }
 
-vector<int> topologicalOrder()
+void topologicalOrder()
 {
-
-    for (int i = 0; i < G.N; i++)
-    {
-        G.nodes[i].color = "white";
-        G.nodes[i].dfs_parent = -1;
-    }
-
     int time = 0;
 
+    // Setup the nodes for the DFS
     for (int i = 0; i < G.N; i++)
-    {
-        if (G.nodes[i].color == "white")
-            time = DFS_visit(i, time);
-    }
+        if (G.nodes[i])
+        {
+            G.nodes[i]->color = "white";
+            G.nodes[i]->dfs_parent = NULL;
+        }
 
-    return topOrder;
+    // Preform DFS for all the 'white' nodes
+    for (int i = 0; i < G.N; i++)
+        if (G.nodes[i])
+            if (G.nodes[i]->color == "white")
+                time = DFS_visit(G.nodes[i], time);
 }
 
 int main()
 {
-    int sources = 0;
-    int longest_path = 1;
+    int sources = 0, longest_path = 1;
 
-    parseInput("banana.txt");
-    topOrder = topologicalOrder();
+    parseInput();
 
-    for (int i = 0; i < G.N; i++)
+    topologicalOrder();
+
+    for (int i = 0; i < int(topOrder.size()); i++)
     {
-        int v_index = topOrder[i];
+        Node v = topOrder[i];
 
-        if (G.nodes[v_index].parents.size() == 0)
+        // If v is a source, its distance is 1 and the number of sources increases
+        if (v->parents.size() == 0)
         {
-            G.nodes[v_index].dist = 1;
+            v->dist = 1;
             sources++;
         }
 
@@ -151,25 +149,25 @@ int main()
         {
             int max = 0;
 
-            for (int k = 0; k < G.nodes[v_index].parents.size(); k++)
-                if (G.nodes[G.nodes[v_index].parents[k]].dist > max)
-                    max = G.nodes[G.nodes[v_index].parents[k]].dist;
+            // The max is distance of the parent with the biggest distance plus 1 (the distance from the parent to v)
+            for (int k = 0; k < int(v->parents.size()); k++)
+                if (v->parents[k]->dist > max)
+                    max = v->parents[k]->dist;
             max += 1;
 
-            G.nodes[v_index].dist = max;
+            // Assign the biggest possible distance to v
+            v->dist = max;
 
+            // If the distance to v is bigger than the previous longest_path, longest_path becomes that distance
             if (max > longest_path)
                 longest_path = max;
         }
     }
 
-    for (int i = 0; i < G.N; i++)
-    {
-        cout << topOrder[i] + 1 << "->";
-    }
-    cout << endl;
-
-    cout << "Number of sources: " << sources << endl;
+    // Add all the single sources
+    sources += G.N - topOrder.size();
+    cout << "Number of vertices: " << G.N << endl;
+    cout << "Minimum interventions: " << sources << endl;
     cout << "Longest path: " << longest_path << endl;
     return 0;
 }
