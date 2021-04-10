@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -10,7 +11,6 @@ typedef struct node
 {
     vector<node *> parents, children;
     int dist = -1;
-    node *dfs_parent;
     string color;
 } * Node;
 
@@ -21,7 +21,7 @@ struct Graph
 };
 
 Graph G;
-vector<Node> topOrder;
+vector<Node> topOrder2, topOrder;
 
 void parseInput()
 {
@@ -65,10 +65,10 @@ void parseInput()
 
         // If either the parent node or the child node dont existe, create them
         if (!G.nodes[child])
-            G.nodes[child] = (Node)malloc(sizeof(struct node));
+            G.nodes[child] = (Node)malloc(sizeof(node));
 
         if (!G.nodes[parent])
-            G.nodes[parent] = (Node)malloc(sizeof(struct node));
+            G.nodes[parent] = (Node)malloc(sizeof(node));
 
         // Add the parent to the childs 'parents' list and the child to the parents 'children' list
         G.nodes[child]->parents.push_back(G.nodes[parent]);
@@ -77,12 +77,10 @@ void parseInput()
         result.clear();
     }
 }
-
-int DFS_visit(Node v, int time)
+/*void DFS_visit(Node v)
 {
 
     v->color = "gray"; // Its currently being visited
-    time++;
 
     // Preform DFS on each of v's children
     for (int i = 0; i < int(v->children.size()); i++)
@@ -92,24 +90,20 @@ int DFS_visit(Node v, int time)
         // Visit child if its 'white'
         if (u->color == "white")
         {
-            time = DFS_visit(u, time);
+            DFS_visit(u);
             u->dfs_parent = v;
         }
     }
 
     // Close the node and assign the close time
     v->color = "black";
-    time++;
 
     // Insert the closed node at the beggining of the topological order vector
-    topOrder.insert(topOrder.begin(), v);
-
-    return time;
+    topOrder2.insert(topOrder2.begin(), v);
 }
 
 void topologicalOrder()
 {
-    int time = 0;
 
     // Setup the nodes for the DFS
     for (int i = 0; i < G.N; i++)
@@ -123,7 +117,56 @@ void topologicalOrder()
     for (int i = 0; i < G.N; i++)
         if (G.nodes[i])
             if (G.nodes[i]->color == "white")
-                time = DFS_visit(G.nodes[i], time);
+                DFS_visit(G.nodes[i]);
+}*/
+
+void topologicalSort()
+{
+    stack<Node> stack;
+
+    for (int i = 0; i < G.N; i++)
+        if (G.nodes[i])
+            G.nodes[i]->color = "white";
+
+    for (int i = 0; i < G.N; i++)
+    {
+        if (G.nodes[i])
+        {
+
+            Node u = G.nodes[i];
+
+            if (u->color != "white")
+                continue;
+
+            stack.push(u);
+
+            while (!stack.empty())
+            {
+
+                Node v = stack.top();
+
+                if (v->color == "white")
+                    v->color = "gray";
+
+                else
+                {
+                    v->color = "black";
+                    topOrder.insert(topOrder.begin(), stack.top());
+                    stack.pop();
+                }
+
+                for (int i = 0; i < int(v->children.size()); i++)
+                {
+                    Node w = v->children[i];
+
+                    if (w->color == "white")
+                    {
+                        stack.push(w);
+                    }
+                }
+            }
+        }
+    }
 }
 
 int main()
@@ -132,7 +175,9 @@ int main()
 
     parseInput();
 
-    topologicalOrder();
+    // Create a vector for the topological order
+    //topologicalOrder();
+    topologicalSort();
 
     for (int i = 0; i < int(topOrder.size()); i++)
     {
@@ -166,8 +211,14 @@ int main()
 
     // Add all the single sources
     sources += G.N - topOrder.size();
-    cout << "Number of vertices: " << G.N << endl;
-    cout << "Minimum interventions: " << sources << endl;
-    cout << "Longest path: " << longest_path << endl;
+
+    cout << sources << " " << longest_path << endl;
+
+    for (int i = 0; i < int(G.nodes.size()); i++)
+        free(G.nodes[i]);
+
+    // cout << "Number of vertices: " << G.N << endl;
+    // cout << "Minimum interventions: " << sources << endl;
+    // cout << "Longest path: " << longest_path << endl;
     return 0;
 }
