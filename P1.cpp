@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <bits/stdc++.h>
+#include <stack>
 
 using namespace std;
 
@@ -21,7 +21,6 @@ struct Graph
 };
 
 Graph G;
-vector<Node> topOrder2, topOrder;
 
 void parseInput()
 {
@@ -65,10 +64,10 @@ void parseInput()
 
         // If either the parent node or the child node dont existe, create them
         if (!G.nodes[child])
-            G.nodes[child] = (Node)malloc(sizeof(node));
+            G.nodes[child] = new node;
 
         if (!G.nodes[parent])
-            G.nodes[parent] = (Node)malloc(sizeof(node));
+            G.nodes[parent] = new node;
 
         // Add the parent to the childs 'parents' list and the child to the parents 'children' list
         G.nodes[child]->parents.push_back(G.nodes[parent]);
@@ -77,52 +76,11 @@ void parseInput()
         result.clear();
     }
 }
-/*void DFS_visit(Node v)
-{
 
-    v->color = "gray"; // Its currently being visited
-
-    // Preform DFS on each of v's children
-    for (int i = 0; i < int(v->children.size()); i++)
-    {
-        Node u = v->children[i];
-
-        // Visit child if its 'white'
-        if (u->color == "white")
-        {
-            DFS_visit(u);
-            u->dfs_parent = v;
-        }
-    }
-
-    // Close the node and assign the close time
-    v->color = "black";
-
-    // Insert the closed node at the beggining of the topological order vector
-    topOrder2.insert(topOrder2.begin(), v);
-}
-
-void topologicalOrder()
-{
-
-    // Setup the nodes for the DFS
-    for (int i = 0; i < G.N; i++)
-        if (G.nodes[i])
-        {
-            G.nodes[i]->color = "white";
-            G.nodes[i]->dfs_parent = NULL;
-        }
-
-    // Preform DFS for all the 'white' nodes
-    for (int i = 0; i < G.N; i++)
-        if (G.nodes[i])
-            if (G.nodes[i]->color == "white")
-                DFS_visit(G.nodes[i]);
-}*/
-
-void topologicalSort()
+vector<Node> topologicalSort()
 {
     stack<Node> stack;
+    vector<Node> topOrder;
 
     for (int i = 0; i < G.N; i++)
         if (G.nodes[i])
@@ -167,6 +125,7 @@ void topologicalSort()
             }
         }
     }
+    return topOrder;
 }
 
 int main()
@@ -177,7 +136,7 @@ int main()
 
     // Create a vector for the topological order
     //topologicalOrder();
-    topologicalSort();
+    vector<Node> topOrder = topologicalSort();
 
     for (int i = 0; i < int(topOrder.size()); i++)
     {
@@ -215,10 +174,7 @@ int main()
     cout << sources << " " << longest_path << endl;
 
     for (int i = 0; i < int(G.nodes.size()); i++)
-        free(G.nodes[i]);
+        delete (G.nodes[i]);
 
-    // cout << "Number of vertices: " << G.N << endl;
-    // cout << "Minimum interventions: " << sources << endl;
-    // cout << "Longest path: " << longest_path << endl;
     return 0;
 }
