@@ -4,6 +4,8 @@
 #include <string>
 #include <sstream>
 #include <stack>
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 
@@ -11,12 +13,12 @@ typedef struct node
 {
     vector<node *> parents, children;
     int dist = -1;
-    string color;
+    string color = "white";
 } * Node;
 
 struct Graph
 {
-    int N;
+    int N, E;
     vector<Node> nodes;
 };
 
@@ -24,41 +26,18 @@ Graph G;
 
 void parseInput()
 {
-    string line;
-    vector<string> result;
-
-    // Get the number of vertices (G.N)
-    getline(cin, line);
-    istringstream iss(line);
-
-    for (string line; iss >> line;)
-        result.push_back(line);
-
-    // We dont need to store the number of edges
-    stringstream temp1(result[0]);
-    temp1 >> G.N;
+    // Read the number of nodes
+    if (!scanf("%d %d", &G.N, &G.E))
+        exit(EXIT_FAILURE);
 
     // Make the nodes vector the size needed
     G.nodes.resize(G.N);
 
-    result.clear();
-
-    // Get the edges
-    while (getline(cin, line))
+    int parent, child;
+    for (int i = 0; i < G.E; i++)
     {
-        istringstream iss(line);
-        int parent, child;
+        scanf("%d %d", &parent, &child);
 
-        // Parse the line
-        for (string line; iss >> line;)
-            result.push_back(line);
-
-        istringstream aux0(result[0]);
-        istringstream aux1(result[1]);
-
-        // Assign the indexes to the nodes (scale with -1, because indexing in C++ starts at 0)
-        aux0 >> parent;
-        aux1 >> child;
         parent -= 1;
         child -= 1;
 
@@ -72,8 +51,6 @@ void parseInput()
         // Add the parent to the childs 'parents' list and the child to the parents 'children' list
         G.nodes[child]->parents.push_back(G.nodes[parent]);
         G.nodes[parent]->children.push_back(G.nodes[child]);
-
-        result.clear();
     }
 }
 
@@ -81,10 +58,6 @@ vector<Node> topologicalSort()
 {
     stack<Node> stack;
     vector<Node> topOrder;
-
-    for (int i = 0; i < G.N; i++)
-        if (G.nodes[i])
-            G.nodes[i]->color = "white";
 
     for (int i = 0; i < G.N; i++)
     {
@@ -118,9 +91,7 @@ vector<Node> topologicalSort()
                     Node w = v->children[i];
 
                     if (w->color == "white")
-                    {
                         stack.push(w);
-                    }
                 }
             }
         }
@@ -130,14 +101,26 @@ vector<Node> topologicalSort()
 
 int main()
 {
+
+    auto start_parse = std::chrono::system_clock::now();
+    parseInput();
+    auto end_parse = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsed_seconds_parse = end_parse - start_parse;
+
+    std::cout << "Parse Input time: " << elapsed_seconds_parse.count() << "s\n";
+
     int sources = 0, longest_path = 1;
 
-    parseInput();
+    auto start_topologicalSort = std::chrono::system_clock::now();
+    vector<Node> topOrder = topologicalSort(); //HERE
+    auto end_topologicalSort = std::chrono::system_clock::now();
 
-    // Create a vector for the topological order
-    //topologicalOrder();
-    vector<Node> topOrder = topologicalSort();
+    std::chrono::duration<double> elapsed_seconds_topologicalSort = end_topologicalSort - start_topologicalSort;
 
+    std::cout << "Topological Sort time: " << elapsed_seconds_topologicalSort.count() << "s\n";
+
+    auto start_algo = std::chrono::system_clock::now();
     for (int i = 0; i < int(topOrder.size()); i++)
     {
         Node v = topOrder[i];
@@ -171,10 +154,16 @@ int main()
     // Add all the single sources
     sources += G.N - topOrder.size();
 
-    cout << sources << " " << longest_path << endl;
+    std::cout << sources << " " << longest_path << endl;
 
     for (int i = 0; i < int(G.nodes.size()); i++)
         delete (G.nodes[i]);
+
+    auto end_algo = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsed_seconds_algo = end_algo - start_algo;
+
+    std::cout << "Algorithm time: " << elapsed_seconds_algo.count() << "s\n";
 
     return 0;
 }
