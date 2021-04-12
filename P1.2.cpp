@@ -33,23 +33,24 @@ void parseInput()
     // Make the nodes vector the size needed
     G.nodes.resize(G.N);
 
+    ios_base::sync_with_stdio(false);
+
 
     std::vector<int> parentVector = std::vector<int>(G.E);
     std::vector<int> childVector = std::vector<int>(G.E);
 
-    for (int i = 0; i < G.E; i++)
-    {
-        scanf("%d %d", &parentVector[i], &childVector[i]);
+    for (int i = 0; i < G.E; i++) {
+    
+        cin >> parentVector[i] >> childVector[i];
 
     }
-    
     int parent, child;
-
+    
     for (int i = 0; i < G.E; i++)
     {
         parent = parentVector[i] - 1;
         child = childVector[i] - 1;
-
+        
         // If either the parent node or the child node dont existe, create them
         if (!G.nodes[child])
             G.nodes[child] = new node;
@@ -57,12 +58,13 @@ void parseInput()
         if (!G.nodes[parent])
             G.nodes[parent] = new node;
 
-        // Add the parent to the childs 'parents' list and the child to the parents 'children' list
+        // // Add the parent to the childs 'parents' list and the child to the parents 'children' list
         G.nodes[child]->parents.emplace_back(G.nodes[parent]);
         G.nodes[parent]->children.emplace_back(G.nodes[child]);
-       
 
     }
+
+
 }
 
 vector<Node> topologicalSort()
@@ -113,25 +115,25 @@ vector<Node> topologicalSort()
 int main()
 {
 
-    auto start_parse = std::chrono::system_clock::now();
+    // auto start_parse = std::chrono::system_clock::now();
     parseInput();
-    auto end_parse = std::chrono::system_clock::now();
+    // auto end_parse = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds_parse = end_parse - start_parse;
+    // std::chrono::duration<double> elapsed_seconds_parse = end_parse - start_parse;
 
-    std::cout << "Parse Input time: " << elapsed_seconds_parse.count() << "s\n";
+    // std::cout << "Parse Input time: " << elapsed_seconds_parse.count() << "s\n";
 
     int sources = 0, longest_path = 1;
 
-    auto start_topologicalSort = std::chrono::system_clock::now();
+    // auto start_topologicalSort = std::chrono::system_clock::now();
     vector<Node> topOrder = topologicalSort(); //HERE
-    auto end_topologicalSort = std::chrono::system_clock::now();
+    // auto end_topologicalSort = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds_topologicalSort = end_topologicalSort - start_topologicalSort;
+    // std::chrono::duration<double> elapsed_seconds_topologicalSort = end_topologicalSort - start_topologicalSort;
 
-    std::cout << "Topological Sort time: " << elapsed_seconds_topologicalSort.count() << "s\n";
+    // std::cout << "Topological Sort time: " << elapsed_seconds_topologicalSort.count() << "s\n";
 
-    auto start_algo = std::chrono::system_clock::now();
+    // auto start_algo = std::chrono::system_clock::now();
     for (int i = 0; i < int(topOrder.size()); i++)
     {
         Node v = topOrder[i];
@@ -170,11 +172,12 @@ int main()
     for (int i = 0; i < int(G.nodes.size()); i++)
         delete (G.nodes[i]);
 
-    auto end_algo = std::chrono::system_clock::now();
+    // auto end_algo = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds_algo = end_algo - start_algo;
+    // std::chrono::duration<double> elapsed_seconds_algo = end_algo - start_algo;
 
-    std::cout << "Algorithm time: " << elapsed_seconds_algo.count() << "s\n";
+    // std::cout << "Algorithm time: " << elapsed_seconds_algo.count() << "s\n";
 
     return 0;
 }
+
