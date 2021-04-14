@@ -33,17 +33,17 @@ void parseInput()
     // Make the nodes vector the size needed
     G.nodes.resize(G.N);
 
-    ios_base::sync_with_stdio(false);
-
+    //ios_base::sync_with_stdio(false);
 
     std::vector<int> parentVector = std::vector<int>(G.E);
     std::vector<int> childVector = std::vector<int>(G.E);
 
     for (int i = 0; i < G.E; i++) {
     
-        cin >> parentVector[i] >> childVector[i];
+        scanf("%d %d", &parentVector[i], &childVector[i]);
 
     }
+
     int parent, child;
     
     for (int i = 0; i < G.E; i++)
@@ -89,9 +89,19 @@ vector<Node> topologicalSort()
 
                 Node v = stack.top();
 
-                if (v->color == "white")
+                if (v->color == "white") {
                     v->color = "gray";
+                    for (int i = 0; i < int(v->children.size()); i++)
+                    {
+                        Node w = v->children[i];
 
+                        if (w->color == "white")
+                            stack.push(w);
+                    }
+                }   
+                else if (v->color == "black") {
+                    stack.pop();
+                }
                 else
                 {
                     v->color = "black";
@@ -99,13 +109,6 @@ vector<Node> topologicalSort()
                     stack.pop();
                 }
 
-                for (int i = 0; i < int(v->children.size()); i++)
-                {
-                    Node w = v->children[i];
-
-                    if (w->color == "white")
-                        stack.push(w);
-                }
             }
         }
     }
