@@ -181,6 +181,11 @@ int main()
 
     int longest_path = g.longestPath(sources);
 
+    if (longest_path == 0)
+    {
+        longest_path++;
+    }
+
     std::cout << sources << " " << longest_path << endl;
 
     return 0;
