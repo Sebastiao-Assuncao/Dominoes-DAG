@@ -33,52 +33,6 @@ void Graph::addEdge(int u, int v)
     parents[v].emplace_back(u);
 }
 
-// vector<int> Graph::topologicalSort()
-// {
-//     stack<int> stack;
-//     vector<int> topOrder;
-//     vector<int> states = vector<int>(N, -1); // -1 "white" 0 "gray" 1 "black"
-
-//     for (int i = 0; i < N; i++)
-//     {
-
-//         if (states[i] != -1)
-//             continue;
-
-//         stack.push(i);
-
-//         while (!stack.empty())
-//         {
-//             int v = stack.top();
-
-//             if (states[v] == -1)
-//             {
-//                 states[v] = 0;
-
-//                 for (int j = 0; j < int(children[v].size()); j++)
-//                 {
-//                     int child = children[v][j];
-
-//                     if (states[child] == -1)
-//                         stack.push(child);
-//                 }
-//             }
-
-//             else if (states[v] == 1)
-//                 stack.pop();
-
-//             else
-//             {
-//                 states[v] = 1;
-//                 topOrder.insert(topOrder.begin(), stack.top());
-//                 stack.pop();
-//             }
-//         }
-//     }
-
-//     return topOrder;
-// }
-
 vector<int> Graph::topologicalSort()
 {
 
@@ -92,8 +46,6 @@ vector<int> Graph::topologicalSort()
     for (int i = 0; i < N; i++)
         if (parents[i].empty())
             q.push(i);
-
-    int cnt = 0;
 
     vector<int> top_order;
 
@@ -109,7 +61,6 @@ vector<int> Graph::topologicalSort()
             if (--in_degree[*itr] == 0)
                 q.push(*itr);
         }
-        cnt++;
     }
 
     return top_order;
