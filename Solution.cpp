@@ -128,7 +128,7 @@ int main()
 
     Graph g = parseInput();
 
-    int sources = 0;
+    int sources = 0; // The number of sources in the graph is the number of interventions needed to make them all fall
 
     int longest_path = g.longestPath(sources);
 
