@@ -1,4 +1,4 @@
-# Analysis and Synthesis of Algorithms - Project 1
+# Dominoes Sequence Fall
 
 Given a specific sequence of dominoes (assume it is a DAG) represented by:
 
